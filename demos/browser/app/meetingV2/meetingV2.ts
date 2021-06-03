@@ -411,8 +411,10 @@ export class DemoMeetingApp
 
     initParameters(): void {
         const meetingId = new URL(window.location.href).searchParams.get('meetingId');
+        const meeting = new URL(window.location.href).searchParams.get('m');
         if (meetingId) {
             (document.getElementById('inputMeetingId') as HTMLInputElement).value = meetingId;
+            (document.getElementById('inputMeeting') as HTMLInputElement).value = meeting;
             (document.getElementById('inputName') as HTMLInputElement).focus();
         } else {
             (document.getElementById('inputMeetingId') as HTMLInputElement).focus();
@@ -462,6 +464,7 @@ export class DemoMeetingApp
 
         document.getElementById('form-authenticate').addEventListener('submit', e => {
             e.preventDefault();
+            this.meeting = (document.getElementById('inputMeeting') as HTMLInputElement).value;
             this.meetingId = (document.getElementById('inputMeetingId') as HTMLInputElement).value;
             this.name = (document.getElementById('inputName') as HTMLInputElement).value;
             this.region = (document.getElementById('inputRegion') as HTMLInputElement).value;
@@ -1397,6 +1400,7 @@ export class DemoMeetingApp
     }
 
     updateRoster(): void {
+        console.log('====roster : ', this.roster)
         const roster = document.getElementById('roster');
         const newRosterCount = Object.keys(this.roster).length;
         while (roster.getElementsByTagName('li').length < newRosterCount) {
@@ -2146,6 +2150,7 @@ export class DemoMeetingApp
     private selectedVideoInput: string | null = null;
 
     async openVideoInputFromSelection(selection: string | null, showPreview: boolean): Promise<void> {
+        console.log('===showPreview is : ' + showPreview);
         if (selection) {
             this.selectedVideoInput = selection;
         }
@@ -2678,7 +2683,7 @@ export class DemoMeetingApp
             this.tileIndexToPinEventListener[tileIndex] = this.createPinUnpinListener(tileState);
             pinButtonElement.addEventListener('click', this.tileIndexToPinEventListener[tileIndex]);
         }
-        this.log(`binding video tile ${tileState.tileId} to ${videoElement.id}`);
+        this.log(`========binding video tile ${tileState.tileId} to ${videoElement.id}`);
         this.audioVideo.bindVideoElement(tileState.tileId, videoElement);
         this.tileIndexToTileId[tileIndex] = tileState.tileId;
         this.tileIdToTileIndex[tileState.tileId] = tileIndex;

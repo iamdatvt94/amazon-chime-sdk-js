@@ -39,6 +39,9 @@ function serve(host = '127.0.0.1:8080') {
             compression({})(request, response, () => {
             });
             const requestUrl = url.parse(request.url, true);
+            if (request.method === 'OPTIONS') {
+                respond(response, 200, 'application/json', JSON.stringify({}));
+            }
             if (request.method === 'GET' && requestUrl.pathname === '/') {
                 // Return the contents of the index page
                 respond(response, 200, 'text/html', indexPage);
@@ -56,34 +59,32 @@ function serve(host = '127.0.0.1:8080') {
                         meetingTable[requestUrl.query.meetingId] = await chime.getMeeting({
                             MeetingId: requestUrl.query.meetingId
                         }).promise();
-                        console.log('=== meeting is : ' + JSON.stringify(meetingTable[requestUrl.query.meetingId]))
                     } catch (e) {
                         console.log('error when create room : ' + e);
                         respond(response, 404, 'text/html', 'Can Not Found Meeting');
                     }
 
                 }
-                // if (meetingTable[requestUrl.query.title] === undefined
-                //     || meetingTable[requestUrl.query.title] == null) {
-                //     // Look up the meeting by its title. If it does not exist, create the meeting.
-                //     if (!meetingTable[requestUrl.query.title]) {
-                //         meetingTable[requestUrl.query.title] = await chime.createMeeting({
-                //             // Use a UUID for the client request token to ensure that any request retries
-                //             // do not create multiple meetings.
-                //             ClientRequestToken: uuidv4(),
-                //             // Specify the media region (where the meeting is hosted).
-                //             // In this case, we use the region selected by the user.
-                //             MediaRegion: requestUrl.query.region,
-                //             // Any meeting ID you wish to associate with the meeting.
-                //             // For simplicity here, we use the meeting title.
-                //             ExternalMeetingId: requestUrl.query.title.substring(0, 64),
-                //         }).promise();
-                //     }
+                // Look up the meeting by its id. If it does not exist, create the meeting.
+                // if (requestUrl.query.title) {
+                //     console.log('====create room by name')
+                //     meetingTable[requestUrl.query.title] = await chime.createMeeting({
+                //         // Use a UUID for the client request token to ensure that any request retries
+                //         // do not create multiple meetings.
+                //         ClientRequestToken: uuidv4(),
+                //         // Specify the media region (where the meeting is hosted).
+                //         // In this case, we use the region selected by the user.
+                //         MediaRegion: requestUrl.query.region,
+                //         // Any meeting ID you wish to associate with the meeting.
+                //         // For simplicity here, we use the meeting title.
+                //         ExternalMeetingId: requestUrl.query.title.substring(0, 64),
+                //     }).promise();
                 // }
 
 
                 // Fetch the meeting info
-                const meeting = meetingTable[requestUrl.query.meetingId];
+                const meeting = meetingTable[requestUrl.query.meetingId] === undefined ?
+                    meetingTable[requestUrl.query.title] : meetingTable[requestUrl.query.meetingId];
                 console.log('===meeting is : ' + meeting);
                 // Create new attendee for the meeting
                 const attendee = await chime.createAttendee({
